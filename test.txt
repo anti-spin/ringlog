@@ -1,0 +1,14 @@
+$ go build .
+$ for i in $(seq 1 100); do echo "This is line $i" |./ringlog -s 500 -f test.log; done
+$ ls -l --block-size=1 test.log | awk '{print $5, $9}' 
+500 test.log
+$ head -1 test.log 
+69
+$ tail -1 test.log 
+This is line 100
+$ for i in $(seq 1 100); do echo "This is line $i" |./ringlog -l 50 -f test.log; done
+$ tail -1 test.log 
+This is line 100
+$ head -1 test.log 
+This is line 51
+
