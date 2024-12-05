@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -31,7 +32,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	file, err := os.OpenFile(*logFile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
+	file, err := os.OpenFile(*logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error opening log file: %v\n", err)
 		os.Exit(1)
@@ -55,12 +56,12 @@ func main() {
 			if *verbose {
 				fmt.Fprintf(os.Stderr, "Checking if truncation by size is needed\n")
 			}
-			checkAndTruncateBySize(file, *maxSize)
+			checkAndTruncateBySize(*logFile, *maxSize)
 		} else if *maxLines > 0 {
 			if *verbose {
 				fmt.Fprintf(os.Stderr, "Checking if truncation by lines is needed\n")
 			}
-			checkAndTruncateByLines(file, *maxLines)
+			checkAndTruncateByLines(*logFile, *maxLines)
 		}
 	}
 
@@ -69,7 +70,14 @@ func main() {
 	}
 }
 
-func checkAndTruncateBySize(file *os.File, maxSize int64) {
+func checkAndTruncateBySize(filePath string, maxSize int64) {
+	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening log file for truncation: %v\n", err)
+		return
+	}
+	defer file.Close()
+
 	info, err := file.Stat()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error stating file: %v\n", err)
@@ -80,27 +88,44 @@ func checkAndTruncateBySize(file *os.File, maxSize int64) {
 		return
 	}
 
-	// Truncate the file in place to keep only the last maxSize bytes
-	remainingContent := make([]byte, maxSize)
-	_, err = file.ReadAt(remainingContent, info.Size()-maxSize)
+	// Seek to the point where we want to start reading
+	offset := info.Size() - maxSize
+	_, err = file.Seek(offset, io.SeekStart)
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error seeking file for truncation: %v\n", err)
+		return
+	}
+
+	// Read the remaining content
+	remainingContent := make([]byte, maxSize)
+	bytesRead, err := file.Read(remainingContent)
+	if err != nil && err != io.EOF {
 		fmt.Fprintf(os.Stderr, "Error reading file for truncation: %v\n", err)
 		return
 	}
 
+	// Truncate and rewrite the file
 	err = file.Truncate(0)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error truncating file: %v\n", err)
 		return
 	}
 
-	_, err = file.WriteAt(remainingContent, 0)
+	file.Seek(0, 0)
+	_, err = file.Write(remainingContent[:bytesRead])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error writing truncated content: %v\n", err)
 	}
 }
 
-func checkAndTruncateByLines(file *os.File, maxLines int) {
+func checkAndTruncateByLines(filePath string, maxLines int) {
+	file, err := os.OpenFile(filePath, os.O_RDWR, 0644)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening log file for truncation: %v\n", err)
+		return
+	}
+	defer file.Close()
+
 	file.Seek(0, 0)
 	scanner := bufio.NewScanner(file)
 	lines := []string{}
@@ -115,7 +140,7 @@ func checkAndTruncateByLines(file *os.File, maxLines int) {
 
 	lines = lines[len(lines)-maxLines:]
 
-	err := file.Truncate(0)
+	err = file.Truncate(0)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error truncating file: %v\n", err)
 		return
