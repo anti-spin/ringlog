@@ -1,0 +1,9 @@
+Package: ringlog
+Version: @VERSION@
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Andi Hechtbauer <anti@spin.de>
+Description: pipe-friendly utility to manage log files by capping size or line count
+Installed-Size: 2200237
+Depends: libc6 (>= 2.31), systemd
