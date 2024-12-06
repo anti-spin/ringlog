@@ -1,0 +1,10 @@
+#!/bin/bash
+# postinst script for ringlog
+
+# Install the man page
+if [ -f debian/ringlog.1 ]; then
+    install -m 644 debian/ringlog.1 /usr/share/man/man1/ringlog.1
+    mandb -q || true
+fi
+
+exit 0

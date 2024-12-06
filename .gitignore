@@ -1,2 +1,12 @@
+.env
 ringlog
 test.log
+.vscode/settings.json
+build/
+# Editor
+*~
+.emacs.d/
+*.swp
+*.swo
+.vim/
+__*

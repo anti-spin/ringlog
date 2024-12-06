@@ -1,0 +1,39 @@
+.TH RINGLOG 1 "December 2024" "ringlog 1.0" "User Commands"
+.SH NAME
+ringlog – pipe-friendly utility to manage log files by capping size or line count.
+
+.SH SYNOPSIS
+.B ringlog
+.RI [ options ]
+
+.SH DESCRIPTION
+.B ringlog
+is a utility designed to cap log file size or line count while being pipe-friendly. It reads input from stdin and writes to a specified log file, ensuring the log does not grow beyond a defined size or number of lines.
+
+.SH OPTIONS
+.TP
+.B \-s <max_size_bytes>
+Maximum size of the log file in bytes.
+.TP
+.B \-l <max_lines>
+Maximum number of lines in the log file.
+.TP
+.B \-f <log_file>
+Path to the log file where the input will be appended.
+.TP
+.B \-v
+Enable verbose output. Prints information about log actions to stderr.
+
+.SH USAGE
+.B ringlog
+is primarily used to cap log output from scripts or cron jobs to ensure log files remain manageable.
+
+Example usage:
+
+.nf
+  ./my_script.sh | ringlog -l 1000 -f /var/log/my_log.log
+.fi
+
+.SH AUTHOR Written by anti-spin.
+
+.SH LICENSE MIT License.
