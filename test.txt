@@ -12,3 +12,15 @@ This is line 100
 $ head -1 test.log 
 This is line 51
 
+$ for i in $(seq 1 100); do ( echo "This is stdout $i"; echo "This is stderr $i" >&2 ) 2>&1 | ./ringlog -l 10 -f test.log; done
+$ cat test.log 
+This is stdout 96
+This is stderr 96
+This is stdout 97
+This is stderr 97
+This is stdout 98
+This is stderr 98
+This is stdout 99
+This is stderr 99
+This is stdout 100
+This is stderr 100
