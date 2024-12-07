@@ -1,6 +1,9 @@
 # Ringlog
 
 [![Go](https://github.com/anti-spin/ringlog/actions/workflows/go.yml/badge.svg)](https://github.com/anti-spin/ringlog/actions/workflows/go.yml)
+[![Latest Version](https://img.shields.io/github/v/tag/anti-spin/ringlog?sort=semver)](https://github.com/anti-spin/ringlog/releases)
+[![License](https://img.shields.io/github/license/anti-spin/ringlog)](https://github.com/anti-spin/ringlog/blob/main/LICENSE)
+
 
 **Ringlog** is is a pipe-friendly utility to manage log files by capping their size or line count. It reads input from stdin and writes to a specified log file, ensuring that the log does not grow beyond the defined size or number of lines. When the log file exceeds the defined limit, it truncates the oldest entries to maintain a circular logging behavior.
 
